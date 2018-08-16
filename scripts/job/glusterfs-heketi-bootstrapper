@@ -43,4 +43,8 @@ sleep 1
 
 $gke_glusterfs_heketi_job_scripts_dir/08-create-glusterfs-heketi-storage-class.sh
 
+sleep 1
+
+$gke_glusterfs_heketi_job_scripts_dir/09-delete-docker-credential.sh
+
 set +x

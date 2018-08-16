@@ -1,14 +1,22 @@
 # Hyper-converged GlusterFS and Heketi Dynamic Volume Provisioning on Google Container Engine (GKE)
 
-## Usage
+## TL;DR
 
 1. Edit [config](config) to match your GKE project/zone
-2. Source [helpers](helpers)
+2. Run init-cluster.sh <USER> <PASSWORD> (`./init-cluster.sh <USER> <PASSWORD>`)
+
+## Usage by steps
+
+1. Edit [config](config) to match your GKE project/zone
+2. Source [helpers](helpers) (run `source helpers`)
 3. Generate `k8s` (run `gke_glusterfs_heketi_generate_k8s`)
-3. Create a cluster (run `gke_glusterfs_heketi_create_cluster` if you want)
-4. Run `kubectl -n glusterfs-heketi-bootstrap create clusterrolebinding glusterfs-heketi-bootstrap --clusterrole=cluster-admin --user=system:serviceaccount:glusterfs-heketi-bootstrap:default --namespace=glusterfs-heketi-bootstrap` for deploy. Next `gcloud iam service-accounts list` and paste email to `kubectl create clusterrolebinding <EMAIL>-cluster-admin-binding --clusterrole=cluster-admin --user=<EMAIL>`
-5. Deploy `Job` within the cluster (run `gke_glusterfs_heketi_deploy_glusterfs_heketi`)
-6. Wait for it to finish
+4. Create a cluster (run `gke_glusterfs_heketi_create_cluster` if you want)
+5. Create namespace in cluster (run `kubectl create -f k8s/00-namespace.yaml`)
+6. Add private registry credentials `kubectl -n glusterfs-heketi-bootstrap create secret docker-registry rtc-regcred --docker-server=registry.tymlez.com --docker-username=<your-name> --docker-password=<your-pword> --docker-email=<your-email>`
+7. Run `kubectl -n glusterfs-heketi-bootstrap create clusterrolebinding glusterfs-heketi-bootstrap --clusterrole=cluster-admin --user=system:serviceaccount:glusterfs-heketi-bootstrap:default --namespace=glusterfs-heketi-bootstrap` for deploy. 
+8. Next create CLuster Role Binding for add capability to configure cluster (run `gcloud iam service-accounts list` and paste email as <EMAIL> to `kubectl create clusterrolebinding <EMAIL>-cluster-admin-binding --clusterrole=cluster-admin --user=<EMAIL>`)
+9. Deploy `Job` within the cluster (run `gke_glusterfs_heketi_deploy_glusterfs_heketi`)
+10. Wait for it to finish
 
 You can deploy the example k8s (mariadb statefulset) to test that everything works.
 

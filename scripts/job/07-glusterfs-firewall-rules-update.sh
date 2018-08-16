@@ -1,6 +1,7 @@
 #!/bin/sh
 
 heketi_nodeport=$(kubectl get svc/heketi -n default -o jsonpath='{.spec.ports[0].nodePort}')
+master_ip=$(gcloud container clusters list --filter="name=${CLUSTER_NAME}" --format=yaml | grep endpoint | cut -d " " -f 2)
 
 second_counter=0
 polling_delay_seconds=2
@@ -26,10 +27,11 @@ done
 echo "Heketi node port: $heketi_nodeport"
 # ------------- [END] Wait for Heketi node port to be configured ------------- #
 
-# ------------ [START] Update firewall rule with Heketi node port ------------ #
+# ----------------------- [START] Delete firewall rule ----------------------- #
 echo "Creating firewall rule..."
 
-gcloud compute firewall-rules update allow-glusterfs \
-  --allow "tcp:$heketi_nodeport" \
-  --source-ranges="0.0.0.0/0"
-# ------------- [END] Update firewall rule with Heketi node port ------------- #
+gcloud compute firewall-rules update "${CLUSTER_NAME}-allow-glusterfs" \
+	  --network ${NETWORK} \
+	  --allow "tcp:$heketi_nodeport" \
+	  --source-ranges="${master_ip}"
+# ------------------------ [END] Delete firewall rule ------------------------ #
